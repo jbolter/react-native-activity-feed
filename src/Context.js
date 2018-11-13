@@ -557,6 +557,8 @@ class FeedManager {
               unseen: prevState.unseen + numActivityDiff,
             };
           });
+
+          this.refresh();
         });
 
         subscription.then(
