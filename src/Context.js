@@ -75,6 +75,7 @@ export class StreamApp extends React.Component<
       {
         feedGroup: 'notification',
         notify: true,
+        realtime: false,
         options: { mark_seen: true },
       },
     ],
@@ -226,6 +227,7 @@ type FeedProps = {|
   options?: FeedRequestOptions,
   analyticsLocation?: string,
   notify?: boolean,
+  realtime?: boolean,
   //** the feed read hander (change only for advanced/complex use-cases) */
   doFeedRequest?: (
     session: BaseUserSession,
@@ -281,10 +283,12 @@ class FeedManager {
   register(callback) {
     this.registeredCallbacks.push(callback);
     this.subscribe();
+    this.subscribeRealtime();
   }
   unregister(callback) {
     this.registeredCallbacks.splice(this.registeredCallbacks.indexOf(callback));
     this.unsubscribe();
+    this.unsubscribeRealtime();
   }
 
   triggerUpdate() {
@@ -557,8 +561,6 @@ class FeedManager {
               unseen: prevState.unseen + numActivityDiff,
             };
           });
-
-          this.refresh();
         });
 
         subscription.then(
@@ -572,6 +574,66 @@ class FeedManager {
           },
         );
         return { subscription };
+      });
+    }
+  };
+
+  subscribeRealtime = async () => {
+    if (this.props.realtime) {
+      let feed = this.feed();
+      await this.setState((prevState) => {
+        if (prevState.subscriptionRealtime) {
+          return {};
+        }
+        let subscription = feed.subscribe((data) => {
+          this.setState((prevState) => {
+            for (activity of data.new) {
+                // TODO: insert real actor data
+                activity.actor = {
+                    id: "19a2dfb77d21350d26db63866a84c620c6d490cee22f7e62c514f33854ebe7d5",
+                    data: {
+                      name: "Katie H",
+                      coverImage: "https://s3-us-west-2.amazonaws.com/hl-msbuddy-qa/profile_pictures/ad8970c9eea84d380d0b409c66112de6.png",
+                      profileImage: "https://s3-us-west-2.amazonaws.com/hl-msbuddy-qa/profile_pictures/ad8970c9eea84d380d0b409c66112de6.png"
+                    },
+                    created_at: "2018-10-22T23:09:58.256537Z",
+                    updated_at: "2018-10-22T23:09:58.256557Z"
+                  }
+            }
+
+            const response = {
+                results: data.new,
+            }
+
+            let activities = prevState.activities.merge(
+              this.responseToActivityMap(response),
+            );
+            let activityIdToPath = {
+                ...prevState.activityIdToPath,
+              ...this.responseToActivityIdToPath(response),
+            };
+
+            const newActivityOrder = response.results.map((a) => a.id);
+
+            return {
+                activityOrder: newActivityOrder.concat(prevState.activityOrder),
+                activities: activities,
+                activityIdToPath: activityIdToPath,
+            };
+          });
+        });
+
+        subscription.then(
+          () => {
+            console.log(
+              `now updating feed in realtime for ${this.feed().id}`,
+            );
+          },
+          (err) => {
+            console.error(err);
+          },
+        );
+        return { subscriptionRealtime: subscription };
       });
     }
   };
@@ -591,6 +653,22 @@ class FeedManager {
       } catch (err) {
         console.error(err);
       }
+    }
+  };
+
+  unsubscribeRealtime = async () => {
+    let { subscriptionRealtime } = this.state;
+    if (!subscriptionRealtime) {
+      return;
+    }
+    await subscriptionRealtime;
+    try {
+        await subscriptionRealtime.cancel();
+        console.log(
+            `stopped listening to changes in realtime for ${this.feed().id}`,
+        );
+    } catch (err) {
+        console.error(err);
     }
   };
 

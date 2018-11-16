@@ -32,6 +32,8 @@ type Props = {|
   Notifier: Renderable,
   /** if true, feed shows the Notifier component when new activities are added */
   notify: boolean,
+  /** if true, feed refreshes when new activities are received */
+  realtime: boolean,
   //** the element that renders the feed footer */
   Footer?: Renderable,
   //** the feed read hander (change only for advanced/complex use-cases) */
@@ -59,6 +61,7 @@ export default class FlatFeed extends React.Component<Props> {
     styles: {},
     feedGroup: 'timeline',
     notify: false,
+    realtime: false,
     Activity: Activity,
     Notifier: NewActivitiesNotification,
   };
@@ -66,11 +69,12 @@ export default class FlatFeed extends React.Component<Props> {
   render() {
     return (
       <Feed
-        feedGroup={this.props.feedGroup}
-        userId={this.props.userId}
-        options={this.props.options}
-        notify={this.props.notify}
-        doFeedRequest={this.props.doFeedRequest}
+          feedGroup={this.props.feedGroup}
+          userId={this.props.userId}
+          options={this.props.options}
+          notify={this.props.notify}
+          realtime={this.props.realtime}
+          doFeedRequest={this.props.doFeedRequest}
       >
         <FeedContext.Consumer>
           {(feedCtx) => {
