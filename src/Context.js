@@ -76,6 +76,7 @@ export class StreamApp extends React.Component<
         feedGroup: 'notification',
         notify: true,
         realtime: false,
+        inverted: false,
         options: { mark_seen: true },
       },
     ],
@@ -228,6 +229,8 @@ type FeedProps = {|
   analyticsLocation?: string,
   notify?: boolean,
   realtime?: boolean,
+  inverted?: boolean,
+  maintainVisibleContentPosition?: any,
   //** the feed read hander (change only for advanced/complex use-cases) */
   doFeedRequest?: (
     session: BaseUserSession,

@@ -34,6 +34,10 @@ type Props = {|
   notify: boolean,
   /** if true, feed refreshes when new activities are received */
   realtime: boolean,
+  /** if true, feed is inverted (transform-y) */
+  inverted: boolean,
+  /** maintainVisibleContentPosition prop for FlatList */
+  maintainVisibleContentPosition: any,
   //** the element that renders the feed footer */
   Footer?: Renderable,
   //** the feed read hander (change only for advanced/complex use-cases) */
@@ -62,6 +66,7 @@ export default class FlatFeed extends React.Component<Props> {
     feedGroup: 'timeline',
     notify: false,
     realtime: false,
+    inverted: false,
     Activity: Activity,
     Notifier: NewActivitiesNotification,
   };
@@ -74,6 +79,8 @@ export default class FlatFeed extends React.Component<Props> {
           options={this.props.options}
           notify={this.props.notify}
           realtime={this.props.realtime}
+          inverted={this.props.inverted}
+          maintainVisibleContentPosition={this.props.maintainVisibleContentPosition}
           doFeedRequest={this.props.doFeedRequest}
       >
         <FeedContext.Consumer>
@@ -147,26 +154,28 @@ class FlatFeedInner extends React.Component<PropsInner> {
 
     return (
       <React.Fragment>
-        {smartRender(this.props.Notifier, notifierProps)}
-        <FlatList
-          ListHeaderComponent={this.props.children}
-          style={styles.container}
-          refreshControl={
-            <RefreshControl
-              refreshing={this.props.refreshing}
-              onRefresh={this.props.refresh}
-            />
-          }
-          data={this.props.activityOrder.map((id) =>
-            this.props.activities.get(id),
-          )}
-          keyExtractor={(item) => item.get('id')}
-          renderItem={this._renderWrappedActivity}
-          onEndReached={
-            this.props.noPagination ? undefined : this.props.loadNextPage
-          }
-          ref={this.listRef}
-        />
+          {smartRender(this.props.Notifier, notifierProps)}
+          <FlatList
+              inverted={this.props.inverted}
+              maintainVisibleContentPosition={this.props.maintainVisibleContentPosition}
+              ListHeaderComponent={this.props.children}
+              style={styles.container}
+              refreshControl={
+                  <RefreshControl
+                      refreshing={this.props.refreshing}
+                      onRefresh={this.props.refresh}
+                  />
+              }
+              data={this.props.activityOrder.map((id) =>
+                  this.props.activities.get(id),
+              )}
+              keyExtractor={(item) => item.get('id')}
+              renderItem={this._renderWrappedActivity}
+              onEndReached={
+                  this.props.noPagination ? undefined : this.props.loadNextPage
+              }
+              ref={this.listRef}
+          />
         {smartRender(this.props.Footer, this._childProps())}
       </React.Fragment>
     );
