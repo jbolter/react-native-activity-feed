@@ -102,6 +102,13 @@ export default class Activity extends React.Component<Props> {
     let styles = buildStylesheet('activity', this.props.styles);
 
     for (let i = 0; i < tokens.length; i++) {
+        const urlRegex = /(https?:\/\/[^\s]+)/gi;
+        const urls = tokens[i].match(urlRegex);
+        let isURL = false;
+        if (urls && urls.length > 0) {
+            isURL = true;
+        }
+
       if (tokens[i][0] === '@') {
         rendered.push(
           <Text
@@ -130,7 +137,7 @@ export default class Activity extends React.Component<Props> {
         activity.attachments &&
         activity.attachments.og &&
         Object.keys(activity.attachments.og).length > 0 &&
-        tokens[i] === activity.attachments.og.url
+        isURL
       ) {
         let url = activity.attachments.og.url;
         rendered.push(

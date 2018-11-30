@@ -7,6 +7,7 @@ import Avatar from './Avatar';
 import FollowButton from './FollowButton';
 import type { StyleSheetLike } from '../types';
 import { buildStylesheet } from '../styles';
+import moment from 'moment';
 
 type Props = {|
   username: ?string,

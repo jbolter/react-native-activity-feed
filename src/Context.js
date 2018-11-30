@@ -7,6 +7,7 @@ import immutable from 'immutable';
 import stream from 'getstream';
 import URL from 'url-parse';
 import _ from 'lodash';
+import moment from 'moment';
 
 import { sleep } from './utils';
 
@@ -525,6 +526,28 @@ class FeedManager {
       });
       return;
     }
+
+    // TODO: Insert timestamp activities here
+    let prevResult;
+    for (let i in response.results) {
+        const result = response.results[i];
+        if (prevResult && result.time && prevResult.time) {
+            const prevMoment = moment.utc(prevResult.time).local();
+            const resultMoment = moment.utc(result.time).local();
+            if (!resultMoment.isSame(prevMoment, 'day')) {
+                const timeActivity = {
+                    isDate: true,
+                    time: prevResult.time,
+                    id: `date-${prevResult.foreign_id}`
+                }
+                response.results.splice(i, 0, timeActivity);
+            }
+        }
+        if (result.time && !result.isDate) {
+            prevResult = result;
+        }
+    }
+
     let newState = {
       activityOrder: response.results.map((a) => a.id),
       activities: this.responseToActivityMap(response),
@@ -592,21 +615,14 @@ class FeedManager {
           this.setState((prevState) => {
             for (activity of data.new) {
                 // TODO: insert real actor data
-                activity.actor = {
-                    id: "19a2dfb77d21350d26db63866a84c620c6d490cee22f7e62c514f33854ebe7d5",
-                    data: {
-                      name: "Katie H",
-                      coverImage: "https://s3-us-west-2.amazonaws.com/hl-msbuddy-qa/profile_pictures/ad8970c9eea84d380d0b409c66112de6.png",
-                      profileImage: "https://s3-us-west-2.amazonaws.com/hl-msbuddy-qa/profile_pictures/ad8970c9eea84d380d0b409c66112de6.png"
-                    },
-                    created_at: "2018-10-22T23:09:58.256537Z",
-                    updated_at: "2018-10-22T23:09:58.256557Z"
-                  }
+                activity.actor = activity.user;
             }
 
             const response = {
                 results: data.new,
             }
+
+            // TODO: Insert timestamp activities here
 
             let activities = prevState.activities.merge(
               this.responseToActivityMap(response),
@@ -707,7 +723,36 @@ class FeedManager {
       });
       return;
     }
+
+    // TODO: Insert timestamp activities here
+
+
     return this.setState((prevState) => {
+        const lastActivityId = prevState.activityOrder[prevState.activityOrder.length - 1];
+        const lastActivity = prevState.activities.get(lastActivityId).toJS();
+
+        console.log('JB nextPage', lastActivity);
+
+        let prevResult = lastActivity;
+        for (let i in response.results) {
+            const result = response.results[i];
+            if (prevResult && result.time && prevResult.time) {
+                const prevMoment = moment.utc(prevResult.time).local();
+                const resultMoment = moment.utc(result.time).local();
+                if (!resultMoment.isSame(prevMoment, 'day')) {
+                    const timeActivity = {
+                        isDate: true,
+                        time: prevResult.time,
+                        id: `date-${prevResult.foreign_id}`
+                    }
+                    response.results.splice(i, 0, timeActivity);
+                }
+            }
+            if (result.time && !result.isDate) {
+                prevResult = result;
+            }
+        }
+
       let activities = prevState.activities.merge(
         this.responseToActivityMap(response),
       );

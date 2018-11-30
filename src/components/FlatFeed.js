@@ -50,6 +50,8 @@ type Props = {|
   //** turns off pagination */
   noPagination?: boolean,
   analyticsLocation?: string,
+  /** Underlying FlatList onScroll event **/
+  onScroll?: () => mixed,
   onRefresh?: () => mixed,
   children?: React.Node,
   styles?: StyleSheetLike,
@@ -71,6 +73,28 @@ export default class FlatFeed extends React.Component<Props> {
     Notifier: NewActivitiesNotification,
   };
 
+  scrollToIndex = (options) => {
+      if (this.feedRef && options) {
+          this.feedRef._scrollToIndex(options);
+      }
+  }
+
+  scrollToOffset = (options) => {
+      if (this.feedRef && options) {
+          this.feedRef._scrollToOffset(options);
+      }
+  }
+
+  scrollToTop = () => {
+      if (this.feedRef) {
+          this.feedRef._scrollToTop();
+      }
+  }
+
+  refresh = () => {
+      this.feedRef._refresh();
+  }
+
   render() {
     return (
       <Feed
@@ -83,11 +107,11 @@ export default class FlatFeed extends React.Component<Props> {
           maintainVisibleContentPosition={this.props.maintainVisibleContentPosition}
           doFeedRequest={this.props.doFeedRequest}
       >
-        <FeedContext.Consumer>
-          {(feedCtx) => {
-            return <FlatFeedInner {...this.props} {...feedCtx} />;
-          }}
-        </FeedContext.Consumer>
+          <FeedContext.Consumer>
+              {(feedCtx) => {
+                  return <FlatFeedInner {...this.props} {...feedCtx} ref={r => this.feedRef = r} />;
+              }}
+          </FeedContext.Consumer>
       </Feed>
     );
   }
@@ -108,6 +132,21 @@ class FlatFeedInner extends React.Component<PropsInner> {
       ref.current.scrollToOffset({ offset: 0 });
     }
   }
+
+  _scrollToIndex(options) {
+    let ref = this.listRef;
+    if (ref && ref.current) {
+      ref.current.scrollToIndex(options);
+    }
+  }
+
+  _scrollToOffset(options) {
+    let ref = this.listRef;
+    if (ref && ref.current) {
+      ref.current.scrollToOffset(options);
+    }
+  }
+
   async componentDidMount() {
     await this._refresh();
   }
@@ -174,9 +213,10 @@ class FlatFeedInner extends React.Component<PropsInner> {
               onEndReached={
                   this.props.noPagination ? undefined : this.props.loadNextPage
               }
+              onScroll={this.props.onScroll}
               ref={this.listRef}
           />
-        {smartRender(this.props.Footer, this._childProps())}
+          {smartRender(this.props.Footer, this._childProps())}
       </React.Fragment>
     );
   }
