@@ -1,3 +1,8 @@
+// @noflow
+/* globals __dirname */
+/* eslint-env commonjs*/
+
+const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
@@ -5,6 +10,13 @@ module.exports = {
   require: ['babel-polyfill'],
   styleguideDir: 'docs',
   sortProps: (props) => props,
+  styleguideComponents: {
+    PathlineRenderer: path.join(
+      __dirname,
+      'src/styleguideComponents/PathlineRenderer.js',
+    ),
+  },
+
   sections: [
     {
       name: 'Introduction',
@@ -14,10 +26,10 @@ module.exports = {
       name: 'Top Level Components',
       content: 'docs/top-level-components.md',
       components: [
+        'src/Context/StreamApp.js',
         'src/components/FlatFeed.js',
         'src/components/NotificationFeed.js',
         'src/components/SinglePost.js',
-        'src/Context.js',
       ],
       exampleMode: 'collapse',
       usageMode: 'expand',
@@ -26,7 +38,12 @@ module.exports = {
       name: 'UI Components',
       content: 'docs/other-components.md',
       components: 'src/components/[A-Z]*.js',
-      ignore: ['**/FlatFeed.js', '**/NotificationFeed.js', '**/SinglePost.js'],
+      ignore: [
+        '**/FlatFeed.js',
+        '**/NotificationFeed.js',
+        '**/SinglePost.js',
+        '**/CommentsContainer.js',
+      ],
       exampleMode: 'collapse',
       usageMode: 'expand',
     },

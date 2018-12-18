@@ -12,7 +12,7 @@ import type {
   StyleSheetLike,
   BaseActivityResponse,
   BaseFeedCtx,
-  BaseUserSession,
+  BaseClient,
   Renderable,
 } from '../types';
 import type { FeedRequestOptions, FeedResponse } from 'getstream';
@@ -27,7 +27,7 @@ type Props = {|
   /** the component to use to render new activities notification */
   Notifier: Renderable,
   doFeedRequest?: (
-    session: BaseUserSession,
+    client: BaseClient,
     feedGroup: string,
     userId?: string,
     options?: FeedRequestOptions,
@@ -37,6 +37,8 @@ type Props = {|
   children?: React.Node,
   styles: StyleSheetLike,
   navigation?: NavigationScreen,
+  /** Any props the react native FlatList accepts */
+  flatListProps?: {},
 |};
 
 export default class NotificationFeed extends React.Component<Props> {
@@ -141,6 +143,7 @@ class NotificationFeedInner extends React.Component<PropsInner> {
             this.props.noPagination ? undefined : this.props.loadNextPage
           }
           ref={this.listRef}
+          {...this.props.flatListProps}
         />
       </React.Fragment>
     );

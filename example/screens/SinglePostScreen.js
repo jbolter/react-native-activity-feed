@@ -10,7 +10,8 @@ import {
   LikeButton,
   ReactionIcon,
   CommentList,
-  LikesList,
+  CommentItem,
+  LikeList,
 } from 'expo-activity-feed';
 
 import RepostList from '../components/RepostList';
@@ -49,6 +50,7 @@ export default class SinglePostScreen extends React.Component<Props> {
           activity={activity}
           feedGroup={feedGroup}
           userId={userId}
+          options={{ withOwnChildren: true }}
           navigation={this.props.navigation}
           Activity={(props) => (
             <React.Fragment>
@@ -56,7 +58,7 @@ export default class SinglePostScreen extends React.Component<Props> {
                 {...props}
                 Footer={
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <LikeButton {...props} />
+                    <LikeButton reactionKind="heart" {...props} />
 
                     <ReactionIcon
                       icon={ReplyIcon}
@@ -68,26 +70,30 @@ export default class SinglePostScreen extends React.Component<Props> {
                   </View>
                 }
               />
-              <CommentList reactions={props.activity.latest_reactions} />
-              <RepostList reactions={props.activity.latest_reactions} />
+              <View style={styles.likesContainer}>
+                <LikeList activityId={props.activity.id} reactionKind="heart" />
+              </View>
+              <RepostList activityId={props.activity.id} />
+              <CommentList
+                activityId={props.activity.id}
+                CommentItem={({ comment }) => (
+                  <React.Fragment>
+                    <CommentItem
+                      comment={comment}
+                      Footer={<LikeButton reaction={comment} {...props} />}
+                    />
+                  </React.Fragment>
+                )}
+              />
 
               <View style={styles.sectionHeader} />
-              <View style={styles.likesContainer}>
-                <LikesList
-                  reactions={props.activity.latest_reactions}
-                  reactionKind="heart"
-                />
-              </View>
             </React.Fragment>
           )}
           Footer={(props) => {
             return (
               <CommentBox
-                onSubmit={(text) =>
-                  props.onAddReaction('comment', activity, {
-                    data: { text: text },
-                  })
-                }
+                activity={activity}
+                onAddReaction={props.onAddReaction}
                 avatarProps={{
                   source: (userData: UserResponse) =>
                     userData.data.profileImage,

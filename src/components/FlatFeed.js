@@ -1,6 +1,6 @@
 // @flow
 import * as React from 'react';
-import { FlatList, RefreshControl } from 'react-native';
+import { FlatList } from 'react-native';
 
 import Activity from './Activity';
 import NewActivitiesNotification from './NewActivitiesNotification';
@@ -13,7 +13,7 @@ import type {
   NavigationScreen,
   StyleSheetLike,
   BaseFeedCtx,
-  BaseUserSession,
+  BaseClient,
   Renderable,
 } from '../types';
 import type {
@@ -42,7 +42,7 @@ type Props = {|
   Footer?: Renderable,
   //** the feed read hander (change only for advanced/complex use-cases) */
   doFeedRequest?: (
-    session: BaseUserSession,
+    client: BaseClient,
     feedGroup: string,
     userId?: string,
     options?: FeedRequestOptions,
@@ -56,6 +56,8 @@ type Props = {|
   children?: React.Node,
   styles?: StyleSheetLike,
   navigation?: NavigationScreen,
+  /** Any props the react native FlatList accepts */
+  flatListProps?: {},
 |};
 
 /**
@@ -167,6 +169,9 @@ class FlatFeedInner extends React.Component<PropsInner> {
     onToggleReaction: this.props.onToggleReaction,
     onAddReaction: this.props.onAddReaction,
     onRemoveReaction: this.props.onRemoveReaction,
+    onToggleChildReaction: this.props.onToggleChildReaction,
+    onAddChildReaction: this.props.onAddChildReaction,
+    onRemoveChildReaction: this.props.onRemoveChildReaction,
     navigation: this.props.navigation,
     feedGroup: this.props.feedGroup,
     userId: this.props.userId,
@@ -199,12 +204,8 @@ class FlatFeedInner extends React.Component<PropsInner> {
               maintainVisibleContentPosition={this.props.maintainVisibleContentPosition}
               ListHeaderComponent={this.props.children}
               style={styles.container}
-              refreshControl={
-                  <RefreshControl
-                      refreshing={this.props.refreshing}
-                      onRefresh={this.props.refresh}
-                  />
-              }
+              refreshing={this.props.refreshing}
+              onRefresh={this.props.refresh}
               data={this.props.activityOrder.map((id) =>
                   this.props.activities.get(id),
               )}
@@ -215,6 +216,7 @@ class FlatFeedInner extends React.Component<PropsInner> {
               }
               onScroll={this.props.onScroll}
               ref={this.listRef}
+              {...this.props.flatListProps}
           />
           {smartRender(this.props.Footer, this._childProps())}
       </React.Fragment>
