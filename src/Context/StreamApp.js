@@ -62,6 +62,8 @@ export class StreamApp extends React.Component<
       {
         feedGroup: 'notification',
         notify: true,
+        realtime: false,
+        inverted: false,
         options: { mark_seen: true },
       },
     ],

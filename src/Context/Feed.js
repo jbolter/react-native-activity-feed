@@ -73,6 +73,9 @@ export type FeedProps = {|
   options?: FeedRequestOptions,
   analyticsLocation?: string,
   notify?: boolean,
+  realtime?: boolean,
+  inverted?: boolean,
+  maintainVisibleContentPosition?: any,
   //** the feed read hander (change only for advanced/complex use-cases) */
   doFeedRequest?: (
     client: BaseClient,
@@ -137,10 +140,12 @@ export class FeedManager {
   register(callback: () => mixed) {
     this.registeredCallbacks.push(callback);
     this.subscribe();
+    this.subscribeRealtime();
   }
   unregister(callback: () => mixed) {
     this.registeredCallbacks.splice(this.registeredCallbacks.indexOf(callback));
     this.unsubscribe();
+    this.unsubscribeRealtime();
   }
 
   triggerUpdate() {
@@ -859,6 +864,59 @@ export class FeedManager {
     }
   };
 
+  subscribeRealtime = async () => {
+     if (this.props.realtime) {
+       let feed = this.feed();
+       await this.setState((prevState) => {
+         if (prevState.subscriptionRealtime) {
+           return {};
+         }
+         let subscription = feed.subscribe((data) => {
+           this.setState((prevState) => {
+             for (activity of data.new) {
+                 // TODO: insert real actor data
+                 activity.actor = activity.user;
+             }
+
+              const response = {
+                 results: data.new,
+             }
+
+              // TODO: Insert timestamp activities here
+
+              let activities = prevState.activities.merge(
+               this.responseToActivityMap(response),
+             );
+             let activityIdToPath = {
+                 ...prevState.activityIdToPath,
+               ...this.responseToActivityIdToPath(response),
+             };
+
+              const newActivityOrder = response.results.map((a) => a.id);
+
+              return {
+                 activityOrder: newActivityOrder.concat(prevState.activityOrder),
+                 activities: activities,
+                 activityIdToPath: activityIdToPath,
+             };
+           });
+         });
+
+          subscription.then(
+           () => {
+             console.log(
+               `now updating feed in realtime for ${this.feed().id}`,
+             );
+           },
+           (err) => {
+             console.error(err);
+           },
+         );
+         return { subscriptionRealtime: subscription };
+       });
+     }
+  };
+
   unsubscribe = async () => {
     const { subscription } = this.state;
     if (!subscription) {
@@ -875,6 +933,22 @@ export class FeedManager {
         console.error(err);
       }
     }
+  };
+
+  unsubscribeRealtime = async () => {
+     let { subscriptionRealtime } = this.state;
+     if (!subscriptionRealtime) {
+       return;
+     }
+     await subscriptionRealtime;
+     try {
+         await subscriptionRealtime.cancel();
+         console.log(
+             `stopped listening to changes in realtime for ${this.feed().id}`,
+         );
+     } catch (err) {
+         console.error(err);
+     }
   };
 
   hasNextPage = () => {
