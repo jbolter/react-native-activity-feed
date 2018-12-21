@@ -891,6 +891,18 @@ export class FeedManager {
                  activityOrder: newActivityOrder.concat(prevState.activityOrder),
                  activities: activities,
                  activityIdToPath: activityIdToPath,
+                 activityIdToPaths: this.responseToActivityIdToPaths(
+                   response,
+                   this.state.activityIdToPaths,
+                 ),
+                 reactionIdToPaths: this.feedResponseToReactionIdToPaths(
+                   response,
+                   this.state.reactionIdToPaths,
+                 ),
+                 reactionActivities: {
+                   ...this.state.reactionActivities,
+                   ...this.responseToReactionActivities(response),
+                 },
              };
            });
          });
