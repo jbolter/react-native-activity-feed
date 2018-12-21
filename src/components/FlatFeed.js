@@ -153,14 +153,15 @@ class FlatFeedInner extends React.Component<PropsInner> {
     await this._refresh();
   }
 
-  _renderWrappedActivity = ({ item }: { item: any }) => {
+  _renderWrappedActivity = ({ item, index }: { item: any, index: number }) => {
     return (
       <ImmutableItemWrapper
-        renderItem={this._renderActivity}
-        item={item}
-        navigation={this.props.navigation}
-        feedGroup={this.props.feedGroup}
-        userId={this.props.userId}
+          renderItem={this._renderActivity}
+          item={item}
+          index={index}
+          navigation={this.props.navigation}
+          feedGroup={this.props.feedGroup}
+          userId={this.props.userId}
       />
     );
   };
@@ -177,9 +178,10 @@ class FlatFeedInner extends React.Component<PropsInner> {
     userId: this.props.userId,
   });
 
-  _renderActivity = (item: ActivityResponse<Object, Object>) => {
+  _renderActivity = (item: ActivityResponse<Object, Object>, index: number) => {
     let args = {
       activity: item,
+      index: index,
       // $FlowFixMe
       styles: this.props.styles.activity,
       ...this._childProps(),
@@ -233,6 +235,6 @@ class ImmutableItemWrapper extends React.PureComponent<
   ImmutableItemWrapperProps,
 > {
   render() {
-    return this.props.renderItem(this.props.item.toJS());
+    return this.props.renderItem(this.props.item.toJS(), this.props.index);
   }
 }

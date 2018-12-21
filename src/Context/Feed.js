@@ -873,18 +873,11 @@ export class FeedManager {
          }
          let subscription = feed.subscribe((data) => {
            this.setState((prevState) => {
-             for (activity of data.new) {
-                 // TODO: insert real actor data
-                 activity.actor = activity.user;
-             }
-
               const response = {
                  results: data.new,
              }
 
-              // TODO: Insert timestamp activities here
-
-              let activities = prevState.activities.merge(
+             let activities = prevState.activities.merge(
                this.responseToActivityMap(response),
              );
              let activityIdToPath = {
