@@ -73,7 +73,6 @@ class ReactionListInner extends React.Component<PropsInner> {
     );
 
     let styles = buildStylesheet('reactionList', this.props.styles);
-    console.log(reactionsOfKind);
 
     if (!reactionsOfKind.size) {
       return null;

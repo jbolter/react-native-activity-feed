@@ -107,6 +107,8 @@ export default class FlatFeed extends React.Component<Props> {
           realtime={this.props.realtime}
           inverted={this.props.inverted}
           maintainVisibleContentPosition={this.props.maintainVisibleContentPosition}
+          reactionListFeedGroup={this.props.reactionListFeedGroup}
+          reactionListFeedId={this.props.reactionListFeedId}
           doFeedRequest={this.props.doFeedRequest}
       >
           <FeedContext.Consumer>

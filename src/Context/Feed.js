@@ -74,6 +74,8 @@ export type FeedProps = {|
   analyticsLocation?: string,
   notify?: boolean,
   realtime?: boolean,
+  reactionListFeedGroup?: string,
+  reactionListFeedId?: string,
   inverted?: boolean,
   maintainVisibleContentPosition?: any,
   //** the feed read hander (change only for advanced/complex use-cases) */
@@ -141,11 +143,13 @@ export class FeedManager {
     this.registeredCallbacks.push(callback);
     this.subscribe();
     this.subscribeRealtime();
+    this.subscribeReactions();
   }
   unregister(callback: () => mixed) {
     this.registeredCallbacks.splice(this.registeredCallbacks.indexOf(callback));
     this.unsubscribe();
     this.unsubscribeRealtime();
+    this.unsubscribeReactions();
   }
 
   triggerUpdate() {
@@ -922,6 +926,82 @@ export class FeedManager {
      }
   };
 
+  subscribeReactions = async () => {
+      const activityId = this.props.reactionListFeedId;
+      const {reactionListFeedGroup} = this.props;
+
+     if (activityId && reactionListFeedGroup) {
+
+         const reactionsFeed = this.props.client.feed(
+           this.props.reactionListFeedGroup,
+           this.props.reactionListFeedId,
+         );
+
+         await this.setState((prevState) => {
+           if (prevState.subscriptionReactions) {
+             return {};
+           }
+
+           let subscription = reactionsFeed.subscribe((data) => {
+               const kind = 'comment';
+               const {actor, reaction} = data.new[0];
+
+               const activity = {
+                   id: reaction.activity_id,
+               }
+
+               // this.trackAnalytics(kind, activity, true);
+               const enrichedReaction = immutable.fromJS({
+                 ...reaction,
+                 user: actor,
+               });
+
+               this.setState((prevState) => {
+                 let { activities } = prevState;
+                 const { reactionIdToPaths } = prevState;
+                 for (const path of this.getActivityPaths(activity)) {
+                   this.removeFoundReactionIdPaths(
+                     activities.getIn(path).toJS(),
+                     reactionIdToPaths,
+                     path,
+                   );
+
+                   activities = activities
+                     .updateIn([...path, 'reaction_counts', kind], (v = 0) => v + 1)
+                     .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
+                       v.unshift(enrichedReaction),
+                     )
+                     .updateIn(
+                       [...path, 'latest_reactions', kind],
+                       (v = immutable.List()) => v.unshift(enrichedReaction),
+                     );
+
+                   this.addFoundReactionIdPaths(
+                     activities.getIn(path).toJS(),
+                     reactionIdToPaths,
+                     path,
+                   );
+                 }
+
+                 return { activities, reactionIdToPaths };
+               });
+           });
+
+            subscription.then(
+             () => {
+               console.log(
+                 `now updating feed for reactions for ${this.feed().id}`,
+               );
+             },
+             (err) => {
+               console.error(err);
+             },
+           );
+           return { subscriptionReactions: subscription };
+         });
+     }
+  }
+
   unsubscribe = async () => {
     const { subscription } = this.state;
     if (!subscription) {
@@ -950,6 +1030,22 @@ export class FeedManager {
          await subscriptionRealtime.cancel();
          console.log(
              `stopped listening to changes in realtime for ${this.feed().id}`,
+         );
+     } catch (err) {
+         console.error(err);
+     }
+  };
+
+  unsubscribeReactions = async () => {
+     let { subscriptionReactions } = this.state;
+     if (!subscriptionReactions) {
+       return;
+     }
+     await subscriptionReactions;
+     try {
+         await subscriptionReactions.cancel();
+         console.log(
+             `stopped listening to changes in reactions for ${this.feed().id}`,
          );
      } catch (err) {
          console.error(err);
