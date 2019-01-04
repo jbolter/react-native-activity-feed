@@ -943,48 +943,55 @@ export class FeedManager {
            }
 
            let subscription = reactionsFeed.subscribe((data) => {
-               const kind = 'comment';
-               const {actor, reaction} = data.new[0];
+               if (data.new && data.new.length > 0) {
 
-               const activity = {
-                   id: reaction.activity_id,
+                   const {actor, reaction, verb} = data.new[0];
+
+                   // Only add comments in realtime
+                   if (verb !== 'comment') {
+                       return;
+                   }
+
+                   const activity = {
+                       id: reaction.activity_id,
+                   }
+
+                   // this.trackAnalytics(verb, activity, true);
+                   const enrichedReaction = immutable.fromJS({
+                       ...reaction,
+                       user: actor,
+                   });
+
+                   this.setState((prevState) => {
+                     let { activities } = prevState;
+                     const { reactionIdToPaths } = prevState;
+                     for (const path of this.getActivityPaths(activity)) {
+                       this.removeFoundReactionIdPaths(
+                         activities.getIn(path).toJS(),
+                         reactionIdToPaths,
+                         path,
+                       );
+
+                       activities = activities
+                         .updateIn([...path, 'reaction_counts', verb], (v = 0) => v + 1)
+                         .updateIn([...path, 'own_reactions', verb], (v = immutable.List()) =>
+                           v.unshift(enrichedReaction),
+                         )
+                         .updateIn(
+                           [...path, 'latest_reactions', verb],
+                           (v = immutable.List()) => v.unshift(enrichedReaction),
+                         );
+
+                       this.addFoundReactionIdPaths(
+                         activities.getIn(path).toJS(),
+                         reactionIdToPaths,
+                         path,
+                       );
+                     }
+
+                     return { activities, reactionIdToPaths };
+                   });
                }
-
-               // this.trackAnalytics(kind, activity, true);
-               const enrichedReaction = immutable.fromJS({
-                 ...reaction,
-                 user: actor,
-               });
-
-               this.setState((prevState) => {
-                 let { activities } = prevState;
-                 const { reactionIdToPaths } = prevState;
-                 for (const path of this.getActivityPaths(activity)) {
-                   this.removeFoundReactionIdPaths(
-                     activities.getIn(path).toJS(),
-                     reactionIdToPaths,
-                     path,
-                   );
-
-                   activities = activities
-                     .updateIn([...path, 'reaction_counts', kind], (v = 0) => v + 1)
-                     .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
-                       v.unshift(enrichedReaction),
-                     )
-                     .updateIn(
-                       [...path, 'latest_reactions', kind],
-                       (v = immutable.List()) => v.unshift(enrichedReaction),
-                     );
-
-                   this.addFoundReactionIdPaths(
-                     activities.getIn(path).toJS(),
-                     reactionIdToPaths,
-                     path,
-                   );
-                 }
-
-                 return { activities, reactionIdToPaths };
-               });
            });
 
             subscription.then(
