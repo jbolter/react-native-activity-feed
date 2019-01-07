@@ -60,6 +60,8 @@ type Props = {|
   flatListProps?: {},
 |};
 
+const TOP_REACHED_THRESHOLD = 50;
+
 /**
  * Renders a feed of activities, this component is a StreamApp consumer
  * and must always be a child of the <StreamApp> element
@@ -192,6 +194,17 @@ class FlatFeedInner extends React.Component<PropsInner> {
     return smartRender(this.props.Activity, { ...args });
   };
 
+  onScroll = (e) => {
+      if (this.props.onScroll) {
+          this.props.onScroll(e);
+      }
+
+      // When "top" is reached (< TOP_REACHED_THRESHOLD), load previous page of data
+      if (!this.props.noPagination && e.nativeEvent.contentOffset.y < TOP_REACHED_THRESHOLD) {
+          this.props.loadReverseNextPage();
+      }
+  }
+
   render() {
     let styles = buildStylesheet('flatFeed', this.props.styles);
     let notifierProps = {
@@ -218,7 +231,7 @@ class FlatFeedInner extends React.Component<PropsInner> {
               onEndReached={
                   this.props.noPagination ? undefined : this.props.loadNextPage
               }
-              onScroll={this.props.onScroll}
+              onScroll={this.onScroll}
               ref={this.listRef}
               {...this.props.flatListProps}
           />
