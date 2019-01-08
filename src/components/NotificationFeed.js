@@ -48,20 +48,24 @@ export default class NotificationFeed extends React.Component<Props> {
     Notifier: NewActivitiesNotification,
   };
 
+  refresh = () => {
+      this.feedRef._refresh();
+  }
+
   render() {
     return (
       <Feed
-        feedGroup={this.props.feedGroup}
-        userId={this.props.userId}
-        options={makeDefaultOptions(this.props.options)}
-        notify={this.props.notify}
-        doFeedRequest={this.props.doFeedRequest}
+          feedGroup={this.props.feedGroup}
+          userId={this.props.userId}
+          options={makeDefaultOptions(this.props.options)}
+          notify={this.props.notify}
+          doFeedRequest={this.props.doFeedRequest}
       >
-        <FeedContext.Consumer>
-          {(feedCtx) => {
-            return <NotificationFeedInner {...this.props} {...feedCtx} />;
-          }}
-        </FeedContext.Consumer>
+          <FeedContext.Consumer>
+              {(feedCtx) => {
+                  return <NotificationFeedInner {...this.props} {...feedCtx} ref={r => this.feedRef = r} />;
+              }}
+          </FeedContext.Consumer>
       </Feed>
     );
   }
