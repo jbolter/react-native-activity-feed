@@ -1352,6 +1352,21 @@ class FeedInner extends React.Component<FeedInnerProps, FeedState> {
     const doFeedRequestDifferent =
       this.props.doFeedRequest !== prevProps.doFeedRequest;
 
+      // Update "next" page URL
+      if (optionsDifferent) {
+          let previousUrl = '';
+          if (this.props.options.id_gte) {
+            previousUrl = `?id_lt=${this.props.options.id_gte}`;
+          } else if (this.props.options.id_gt) {
+            previousUrl = `?id_lte=${this.props.options.id_gt}`;
+          } else if (this.props.options.id_lte) {
+            previousUrl = `?id_gt=${this.props.options.id_lte}`;
+          } else if (this.props.options.id_lt) {
+            previousUrl = `?id_gte=${this.props.options.id_lt}`;
+          }
+          this.state.manager.state.lastReverseResponse = { ...this.state.manager.state.lastReverseResponse, next: previousUrl };
+      }
+
     if (
       clientDifferent ||
       feedDifferent ||
