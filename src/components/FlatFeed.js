@@ -77,6 +77,10 @@ export default class FlatFeed extends React.Component<Props> {
     Notifier: NewActivitiesNotification,
   };
 
+  scrollToActivity = (activityId) => {
+      this.feedRef._scrollToActivity(activityId);
+  }
+
   scrollToIndex = (options) => {
       if (this.feedRef && options) {
           this.feedRef._scrollToIndex(options);
@@ -132,6 +136,23 @@ class FlatFeedInner extends React.Component<PropsInner> {
     this._scrollToTop();
   };
 
+  _scrollToActivity = (activityId) => {
+      let i = 0;
+      for (activityOrderId of this.props.activityOrder) {
+          if (activityOrderId === activityId) {
+              break;
+          }
+          i++;
+      }
+
+      this._scrollToIndex({
+          animated: true,
+          index: i,
+          viewOffset: -80,
+          viewPosition: 1,
+      })
+  }
+
   _scrollToTop() {
     let ref = this.listRef;
     if (ref && ref.current) {
@@ -181,6 +202,8 @@ class FlatFeedInner extends React.Component<PropsInner> {
     navigation: this.props.navigation,
     feedGroup: this.props.feedGroup,
     userId: this.props.userId,
+    hasNextPage: this.props.hasNextPage,
+    hasReverseNextPage: this.props.hasReverseNextPage,
   });
 
   _renderActivity = (item: ActivityResponse<Object, Object>, index: number) => {
@@ -197,11 +220,11 @@ class FlatFeedInner extends React.Component<PropsInner> {
 
   onScroll = (e) => {
       if (this.props.onScroll) {
-          this.props.onScroll(e);
+          this.props.onScroll(e, this.props.hasNextPage, this.props.hasReverseNextPage);
       }
 
       // When "top" is reached (< TOP_REACHED_THRESHOLD), load previous page of data
-      if (!this.props.noPagination && e.nativeEvent.contentOffset.y < TOP_REACHED_THRESHOLD) {
+      if (!this.props.noPagination && e.nativeEvent.contentOffset.y < TOP_REACHED_THRESHOLD && this.props.hasReverseNextPage) {
           this.props.loadReverseNextPage();
       }
   }
