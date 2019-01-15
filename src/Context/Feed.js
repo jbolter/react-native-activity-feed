@@ -322,6 +322,48 @@ export class FeedManager {
     });
   };
 
+  onInsertReaction = async (
+    kind: string,
+    activity: BaseActivityResponse,
+    reaction: any,
+  ) => {
+    // this.trackAnalytics(kind, activity, options.trackAnalytics);
+    const enrichedReaction = immutable.fromJS({
+      ...reaction,
+      user: reaction.user,
+    });
+
+    this.setState((prevState) => {
+      let { activities } = prevState;
+      const { reactionIdToPaths } = prevState;
+      for (const path of this.getActivityPaths(activity)) {
+        this.removeFoundReactionIdPaths(
+          activities.getIn(path).toJS(),
+          reactionIdToPaths,
+          path,
+        );
+
+        activities = activities
+          .updateIn([...path, 'reaction_counts', kind], (v = 0) => v + 1)
+          .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
+            v.unshift(enrichedReaction),
+          )
+          .updateIn(
+            [...path, 'latest_reactions', kind],
+            (v = immutable.List()) => v.unshift(enrichedReaction),
+          );
+
+        this.addFoundReactionIdPaths(
+          activities.getIn(path).toJS(),
+          reactionIdToPaths,
+          path,
+        );
+      }
+
+      return { activities, reactionIdToPaths };
+    });
+  };
+
   onRemoveReaction = async (
     kind: string,
     activity: BaseActivityResponse,
@@ -1280,6 +1322,10 @@ export class FeedManager {
       options.id_gt = 'non-existant-' + generateRandomId();
     }
 
+    // Load 100 comments at a time
+    options.limit = 100;
+
+
     const refreshing = this.state.activities.getIn(refreshingPath, false);
 
     if (!nextUrl || refreshing) {
@@ -1422,6 +1468,7 @@ class FeedInner extends React.Component<FeedInnerProps, FeedState> {
       getActivityPath: manager.getActivityPath,
       onToggleReaction: manager.onToggleReaction,
       onAddReaction: manager.onAddReaction,
+      onInsertReaction: manager.onInsertReaction,
       onRemoveReaction: manager.onRemoveReaction,
       onToggleChildReaction: manager.onToggleChildReaction,
       onAddChildReaction: manager.onAddChildReaction,

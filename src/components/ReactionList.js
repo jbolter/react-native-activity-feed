@@ -38,6 +38,8 @@ type Props = {|
   styles?: StyleSheetLike,
 |};
 
+const TOP_REACHED_THRESHOLD = 100;
+
 export default class ReactionList extends React.PureComponent<Props> {
   static defaultProps = {
     LoadMoreButton,
@@ -95,6 +97,46 @@ class ReactionListInner extends React.Component<PropsInner> {
     this.initReactions();
   }
 
+  keyExtractor = (item) => {
+      return item.get('id');
+  }
+
+  onLayout = (e) => {
+      this.yCoordinate = e.nativeEvent.layout.y;
+  }
+
+  onScroll = (e) => {
+      if (this.props.onScroll) {
+          this.props.onScroll(e);
+      }
+
+      const {
+        activityId,
+        activities,
+        infiniteScroll,
+        reactionKind,
+        getActivityPath,
+        noPagination,
+        oldestToNewest,
+        reverseOrder,
+      } = this.props;
+
+      const activityPath = this.props.activityPath || getActivityPath(activityId);
+
+      const listTop = e.nativeEvent.contentOffset.y - this.yCoordinate;
+
+      // When "top" is reached (< TOP_REACHED_THRESHOLD), load previous page of data
+      if (!noPagination && listTop < TOP_REACHED_THRESHOLD) {
+          console.log('LOADING NEXT REACTIONS')
+          // this.props.loadNextReactions(
+          //     activityId,
+          //     reactionKind,
+          //     activityPath,
+          //     oldestToNewest,
+          // )
+      }
+  }
+
   render() {
     const {
       activityId,
@@ -144,43 +186,47 @@ class ReactionListInner extends React.Component<PropsInner> {
       !nextUrl ||
       this.props.infiniteScroll ? null : (
         <LoadMoreButton
-          refreshing={refreshing}
-          styles={styles}
-          onPress={() =>
-            this.props.loadNextReactions(
-              activityId,
-              reactionKind,
-              activityPath,
-              oldestToNewest,
-            )
-          }
-        />
-      );
-
-    return (
-      <React.Fragment>
-        {this.props.children}
-        {reverseOrder && loadMoreButton}
-        <FlatList
-          style={styles.container}
-          refreshing={refreshing}
-          data={reactionsOfKind.toArray()}
-          keyExtractor={(item) => item.get('id')}
-          listKey={reactionKind}
-          renderItem={this._renderWrappedReaction}
-          inverted={reverseOrder}
-          onEndReached={
-            this.props.noPagination || !this.props.infiniteScroll
-              ? undefined
-              : () =>
-                  this.props.loadNextReactions(
+            refreshing={refreshing}
+            styles={styles}
+            onPress={() =>
+                this.props.loadNextReactions(
                     activityId,
                     reactionKind,
                     activityPath,
                     oldestToNewest,
+                )
+            }
+        />
+      );
+
+      // console.log('reactionsOfKind.toArray()', reactionsOfKind.toArray());
+
+    return (
+      <React.Fragment>
+          {this.props.children}
+          {reverseOrder && loadMoreButton}
+          <FlatList
+              style={styles.container}
+              refreshing={refreshing}
+              data={reactionsOfKind.toArray()}
+              keyExtractor={this.keyExtractor}
+              listKey={this.props.keyPrefix + '-' + reactionKind}
+              renderItem={this._renderWrappedReaction}
+              inverted={reverseOrder}
+              onEndReached={
+                  this.props.noPagination || !this.props.infiniteScroll
+                      ? undefined
+                      : () =>
+                  this.props.loadNextReactions(
+                      activityId,
+                      reactionKind,
+                      activityPath,
+                      oldestToNewest,
                   )
-          }
-          {...this.props.flatListProps}
+              }
+              onLayout={this.onLayout}
+              onScroll={this.onScroll}
+              {...this.props.flatListProps}
         />
         {!reverseOrder && loadMoreButton}
       </React.Fragment>

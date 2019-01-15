@@ -77,8 +77,24 @@ export default class FlatFeed extends React.Component<Props> {
     Notifier: NewActivitiesNotification,
   };
 
+  onAddReaction = (kind, activityId, data, targetFeeds) => {
+      if (this.feedRef._onAddReaction) {
+          this.feedRef._onAddReaction(kind, activityId, data, targetFeeds)
+      }
+  }
+
+  onInsertReaction = (kind, activity, reaction) => {
+      if (this.feedRef._onInsertReaction) {
+          this.feedRef._onInsertReaction(kind, activity, reaction)
+      }
+  }
+
   scrollToActivity = (activityId) => {
       this.feedRef._scrollToActivity(activityId);
+  }
+
+  scrollToEnd = (animated = true) => {
+      this.feedRef._scrollToEnd({animated: animated});
   }
 
   scrollToIndex = (options) => {
@@ -136,6 +152,18 @@ class FlatFeedInner extends React.Component<PropsInner> {
     this._scrollToTop();
   };
 
+  _onAddReaction = (kind, activityId, data, targetFeeds) => {
+      if (this.props.onAddReaction) {
+          this.props.onAddReaction(kind, activityId, data, targetFeeds)
+      }
+  }
+
+  _onInsertReaction = (kind, activity, reaction) => {
+      if (this.props.onInsertReaction) {
+          this.props.onInsertReaction(kind, activity, reaction)
+      }
+  }
+
   _scrollToActivity = (activityId) => {
       let i = 0;
       for (activityOrderId of this.props.activityOrder) {
@@ -151,6 +179,13 @@ class FlatFeedInner extends React.Component<PropsInner> {
           viewOffset: -80,
           viewPosition: 1,
       })
+  }
+
+  _scrollToEnd = (animated = true) => {
+      let ref = this.listRef;
+      if (ref && ref.current) {
+        ref.current.scrollToEnd({animated: animated});
+      }
   }
 
   _scrollToTop() {
@@ -195,6 +230,7 @@ class FlatFeedInner extends React.Component<PropsInner> {
     onRemoveActivity: this.props.onRemoveActivity,
     onToggleReaction: this.props.onToggleReaction,
     onAddReaction: this.props.onAddReaction,
+    onInsertReaction: this.props.onInsertReaction,
     onRemoveReaction: this.props.onRemoveReaction,
     onToggleChildReaction: this.props.onToggleChildReaction,
     onAddChildReaction: this.props.onAddChildReaction,
