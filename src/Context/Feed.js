@@ -1323,7 +1323,7 @@ export class FeedManager {
     }
 
     // Load 100 comments at a time
-    options.limit = 100;
+    // options.limit = 100;
 
 
     const refreshing = this.state.activities.getIn(refreshingPath, false);

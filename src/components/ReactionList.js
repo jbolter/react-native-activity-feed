@@ -127,7 +127,7 @@ class ReactionListInner extends React.Component<PropsInner> {
 
       // When "top" is reached (< TOP_REACHED_THRESHOLD), load previous page of data
       if (!noPagination && listTop < TOP_REACHED_THRESHOLD) {
-          console.log('LOADING NEXT REACTIONS')
+          // console.log('LOADING NEXT REACTIONS')
           // this.props.loadNextReactions(
           //     activityId,
           //     reactionKind,
@@ -196,10 +196,10 @@ class ReactionListInner extends React.Component<PropsInner> {
                     oldestToNewest,
                 )
             }
-        />
+        >
+            View more replies...
+        </LoadMoreButton>
       );
-
-      // console.log('reactionsOfKind.toArray()', reactionsOfKind.toArray());
 
     return (
       <React.Fragment>
