@@ -80,6 +80,7 @@ export type FeedProps = {|
   notify?: boolean,
   realtime?: boolean,
   blockedUserIds?: any,
+  blockedByUserIds?: any,
   reactionListFeedGroup?: string,
   reactionListFeedId?: string,
   inverted?: boolean,
@@ -635,13 +636,19 @@ export class FeedManager {
     let { results } = response;
 
     try {
+        const {blockedUserIds, blockedByUserIds} = this.props;
         // Remove blocked users
-        if (this.props.blockedUserIds && this.props.blockedUserIds.length) {
+        let blockedOrBlockedByUserIds = (blockedUserIds && blockedUserIds.length) ? blockedUserIds : [];
+        if (blockedByUserIds && blockedByUserIds.length) {
+            blockedOrBlockedByUserIds = blockedOrBlockedByUserIds.concat(blockedByUserIds);
+        }
+
+        if ((blockedOrBlockedByUserIds && blockedOrBlockedByUserIds.length)) {
             var i = results.length
             while (i--) {
                 // Get single activity or first activity in activity group
                 const activity = (results[i]) ? (results[i].activities) ? results[i].activities[0] : results[i] : results[i];
-                if (activity && activity.actor && this.props.blockedUserIds.includes(activity.actor.id)) {
+                if (activity && activity.actor && blockedOrBlockedByUserIds.includes(activity.actor.id)) {
                     results.splice(i, 1);
                 }
             }

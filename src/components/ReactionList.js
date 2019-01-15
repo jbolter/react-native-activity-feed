@@ -204,7 +204,7 @@ class ReactionListInner extends React.Component<PropsInner> {
       // Filter out blocked user reactions
       const reactionsOfKindWithoutBlocked = reactionsOfKind.filter((item) => {
           const userId = item.get('user').get('id');
-          return !this.props.blockedUserIds.includes(userId)
+          return !this.props.blockedUserIds.includes(userId) && !this.props.blockedByUserIds.includes(userId)
       });
 
     return (

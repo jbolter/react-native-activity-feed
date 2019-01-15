@@ -123,6 +123,7 @@ export default class FlatFeed extends React.Component<Props> {
     return (
       <Feed
           blockedUserIds={this.props.blockedUserIds}
+          blockedByUserIds={this.props.blockedByUserIds}
           feedGroup={this.props.feedGroup}
           userId={this.props.userId}
           options={this.props.options}
