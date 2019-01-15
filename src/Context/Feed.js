@@ -79,6 +79,7 @@ export type FeedProps = {|
   analyticsLocation?: string,
   notify?: boolean,
   realtime?: boolean,
+  blockedUserIds?: any,
   reactionListFeedGroup?: string,
   reactionListFeedId?: string,
   inverted?: boolean,
@@ -630,6 +631,25 @@ export class FeedManager {
         await sleep(waitTime);
       }
     }
+
+    let { results } = response;
+
+    try {
+        // Remove blocked users
+        if (this.props.blockedUserIds && this.props.blockedUserIds.length) {
+            var i = results.length
+            while (i--) {
+                // Get single activity or first activity in activity group
+                const activity = (results[i]) ? (results[i].activities) ? results[i].activities[0] : results[i] : results[i];
+                if (activity && activity.actor && this.props.blockedUserIds.includes(activity.actor.id)) {
+                    results.splice(i, 1);
+                }
+            }
+        }
+    } catch (error) {
+        console.log('Error removing blocked users', error);
+    }
+
     return response;
   };
 

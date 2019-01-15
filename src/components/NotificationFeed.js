@@ -39,6 +39,7 @@ type Props = {|
   navigation?: NavigationScreen,
   /** Any props the react native FlatList accepts */
   flatListProps?: {},
+  blockedUserIds?: [],
 |};
 
 export default class NotificationFeed extends React.Component<Props> {
@@ -53,8 +54,10 @@ export default class NotificationFeed extends React.Component<Props> {
   }
 
   render() {
+
     return (
       <Feed
+          blockedUserIds={this.props.blockedUserIds}
           feedGroup={this.props.feedGroup}
           userId={this.props.userId}
           options={makeDefaultOptions(this.props.options)}

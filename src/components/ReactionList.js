@@ -201,6 +201,12 @@ class ReactionListInner extends React.Component<PropsInner> {
         </LoadMoreButton>
       );
 
+      // Filter out blocked user reactions
+      const reactionsOfKindWithoutBlocked = reactionsOfKind.filter((item) => {
+          const userId = item.get('user').get('id');
+          return !this.props.blockedUserIds.includes(userId)
+      });
+
     return (
       <React.Fragment>
           {this.props.children}
@@ -208,7 +214,7 @@ class ReactionListInner extends React.Component<PropsInner> {
           <FlatList
               style={styles.container}
               refreshing={refreshing}
-              data={reactionsOfKind.toArray()}
+              data={reactionsOfKindWithoutBlocked.toArray()}
               keyExtractor={this.keyExtractor}
               listKey={this.props.keyPrefix + '-' + reactionKind}
               renderItem={this._renderWrappedReaction}
