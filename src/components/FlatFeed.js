@@ -77,6 +77,12 @@ export default class FlatFeed extends React.Component<Props> {
     Notifier: NewActivitiesNotification,
   };
 
+  loadNextPage = () => {
+      if (this.feedRef._loadNextPage) {
+          this.feedRef._loadNextPage();
+      }
+  }
+
   onAddReaction = (kind, activityId, data, targetFeeds) => {
       if (this.feedRef._onAddReaction) {
           this.feedRef._onAddReaction(kind, activityId, data, targetFeeds)
@@ -160,6 +166,13 @@ export default class FlatFeed extends React.Component<Props> {
 type PropsInner = {| ...Props, ...BaseFeedCtx |};
 class FlatFeedInner extends React.Component<PropsInner> {
   listRef = React.createRef();
+
+  _loadNextPage = () => {
+      if (this.props.loadNextPage) {
+          this.props.loadNextPage();
+      }
+  }
+
   _refresh = async () => {
     this._scrollToTop();
     await this.props.refresh(this.props.options);
