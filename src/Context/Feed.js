@@ -293,6 +293,11 @@ export class FeedManager {
       user: this.props.user.full,
     });
 
+    // Healthline: Notify other feeds that this is happening
+    // This is used to update the "parent" feed of a thread
+    const eventData = {new: [{object: activity, reaction: reaction, verb: reaction.kind,}]};
+    window.notificationEventBus.trigger('FEED_ACTIVITY_REACTIONS_LISTENER', eventData);
+
     this.setState((prevState) => {
       let { activities } = prevState;
       const { reactionIdToPaths } = prevState;
@@ -384,6 +389,55 @@ export class FeedManager {
       return;
     }
     this.trackAnalytics('un' + kind, activity, options.trackAnalytics);
+    if (this.state.reactionActivities[id]) {
+      this._removeActivityFromState(this.state.reactionActivities[id]);
+    }
+
+    const eventData = {deleted: [{object: activity, id: id, verb: kind,}]};
+
+    // Healthline: Notify other feeds that this is happening
+    // This is used to update the "parent" feed of a thread
+    window.notificationEventBus.trigger('FEED_ACTIVITY_REACTIONS_LISTENER', eventData);
+
+    return this.setState((prevState) => {
+      let { activities } = prevState;
+      const { reactionIdToPaths } = prevState;
+      for (const path of this.getActivityPaths(activity)) {
+        this.removeFoundReactionIdPaths(
+          activities.getIn(path).toJS(),
+          reactionIdToPaths,
+          path,
+        );
+
+        activities = activities
+          .updateIn([...path, 'reaction_counts', kind], (v = 0) => v - 1)
+          .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
+            v.remove(v.findIndex((r) => r.get('id') === id)),
+          )
+          .updateIn(
+            [...path, 'latest_reactions', kind],
+            (v = immutable.List()) =>
+              v.remove(v.findIndex((r) => r.get('id') === id)),
+          );
+
+        this.addFoundReactionIdPaths(
+          activities.getIn(path).toJS(),
+          reactionIdToPaths,
+          path,
+        );
+      }
+
+      return { activities, reactionIdToPaths };
+    });
+  };
+
+  onDeleteReaction = async (
+    kind: string,
+    activity: BaseActivityResponse,
+    id: string,
+    options: { trackAnalytics?: boolean } = {},
+  ) => {
+    // this.trackAnalytics('un' + kind, activity, options.trackAnalytics);
     if (this.state.reactionActivities[id]) {
       this._removeActivityFromState(this.state.reactionActivities[id]);
     }
@@ -1495,6 +1549,7 @@ class FeedInner extends React.Component<FeedInnerProps, FeedState> {
       getActivityPath: manager.getActivityPath,
       onToggleReaction: manager.onToggleReaction,
       onAddReaction: manager.onAddReaction,
+      onDeleteReaction: manager.onDeleteReaction,
       onInsertReaction: manager.onInsertReaction,
       onRemoveReaction: manager.onRemoveReaction,
       onToggleChildReaction: manager.onToggleChildReaction,
