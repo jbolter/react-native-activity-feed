@@ -83,6 +83,12 @@ export default class FlatFeed extends React.Component<Props> {
       }
   }
 
+  onDeleteActivity = (kind, activity, reaction) => {
+      if (this.feedRef._onDeleteActivity) {
+          this.feedRef._onDeleteActivity(kind, activity, reaction)
+      }
+  }
+
   onDeleteReaction = (kind, activity, reaction) => {
       if (this.feedRef._onDeleteReaction) {
           this.feedRef._onDeleteReaction(kind, activity, reaction)
@@ -166,6 +172,12 @@ class FlatFeedInner extends React.Component<PropsInner> {
       }
   }
 
+  _onDeleteActivity = (kind, activity, reaction) => {
+      if (this.props.onDeleteActivity) {
+          this.props.onDeleteActivity(kind, activity, reaction)
+      }
+  }
+
   _onDeleteReaction = (kind, activity, reaction) => {
       if (this.props.onDeleteReaction) {
           this.props.onDeleteReaction(kind, activity, reaction)
@@ -241,6 +253,7 @@ class FlatFeedInner extends React.Component<PropsInner> {
   };
 
   _childProps = () => ({
+    onDeleteActivity: this.props.onDeleteActivity,
     onRemoveActivity: this.props.onRemoveActivity,
     onToggleReaction: this.props.onToggleReaction,
     onAddReaction: this.props.onAddReaction,

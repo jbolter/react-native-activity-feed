@@ -65,6 +65,7 @@ export type FeedCtx = {|
   onToggleChildReaction: ToggleChildReactionCallbackFunction,
   onAddChildReaction: AddChildReactionCallbackFunction,
   onRemoveChildReaction: RemoveChildReactionCallbackFunction,
+  onDeleteActivity: (activityId: string) => Promise<mixed>,
   onRemoveActivity: (activityId: string, kind: string) => Promise<mixed>,
   getActivityPath: (
     activity: BaseActivityResponse | string,
@@ -638,6 +639,10 @@ export class FeedManager {
       });
       return;
     }
+    return this._removeActivityFromState(activityId);
+  };
+
+  onDeleteActivity = (activityId: string) => {
     return this._removeActivityFromState(activityId);
   };
 
@@ -1555,6 +1560,7 @@ class FeedInner extends React.Component<FeedInnerProps, FeedState> {
       onToggleChildReaction: manager.onToggleChildReaction,
       onAddChildReaction: manager.onAddChildReaction,
       onRemoveChildReaction: manager.onRemoveChildReaction,
+      onDeleteActivity: manager.onDeleteActivity,
       onRemoveActivity: manager.onRemoveActivity,
       refresh: manager.refresh,
       refreshUnreadUnseen: manager.refreshUnreadUnseen,
