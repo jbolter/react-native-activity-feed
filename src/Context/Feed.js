@@ -164,13 +164,13 @@ export class FeedManager {
   register(callback: () => mixed) {
     this.registeredCallbacks.push(callback);
     this.subscribe();
-    this.subscribeRealtime();
+    // this.subscribeRealtime();
     this.subscribeReactions();
   }
   unregister(callback: () => mixed) {
     this.registeredCallbacks.splice(this.registeredCallbacks.indexOf(callback));
     this.unsubscribe();
-    this.unsubscribeRealtime();
+    // this.unsubscribeRealtime();
     this.unsubscribeReactions();
   }
 
@@ -328,6 +328,44 @@ export class FeedManager {
 
       return { activities, reactionIdToPaths };
     });
+  };
+
+  onInsertActivities = async (
+      data: Array<{}>,
+  ) => {
+      this.setState((prevState) => {
+          const response = {
+              results: data,
+          }
+
+          let activities = prevState.activities.merge(
+              this.responseToActivityMap(response),
+          );
+          let activityIdToPath = {
+              ...prevState.activityIdToPath,
+              ...this.responseToActivityIdToPath(response),
+          };
+
+          const newActivityOrder = response.results.map((a) => a.id);
+
+          return {
+              activityOrder: newActivityOrder.concat(prevState.activityOrder),
+              activities: activities,
+              activityIdToPath: activityIdToPath,
+              activityIdToPaths: this.responseToActivityIdToPaths(
+                  response,
+                  this.state.activityIdToPaths,
+              ),
+              reactionIdToPaths: this.feedResponseToReactionIdToPaths(
+                  response,
+                  this.state.reactionIdToPaths,
+              ),
+              reactionActivities: {
+                  ...this.state.reactionActivities,
+                  ...this.responseToReactionActivities(response),
+              },
+          };
+      });
   };
 
   onInsertReaction = async (
@@ -1512,8 +1550,7 @@ class FeedInner extends React.Component<FeedInnerProps, FeedState> {
       this.props.userId !== prevProps.userId ||
       this.props.feedGroup !== prevProps.feedGroup;
     const optionsDifferent = !_.isEqual(this.props.options, prevProps.options);
-    const doFeedRequestDifferent =
-      this.props.doFeedRequest !== prevProps.doFeedRequest;
+    const doFeedRequestDifferent = this.props.doFeedRequest !== prevProps.doFeedRequest;
 
       // Update "next" page URL
       if (optionsDifferent) {
@@ -1555,6 +1592,7 @@ class FeedInner extends React.Component<FeedInnerProps, FeedState> {
       onToggleReaction: manager.onToggleReaction,
       onAddReaction: manager.onAddReaction,
       onDeleteReaction: manager.onDeleteReaction,
+      onInsertActivities: manager.onInsertActivities,
       onInsertReaction: manager.onInsertReaction,
       onRemoveReaction: manager.onRemoveReaction,
       onToggleChildReaction: manager.onToggleChildReaction,

@@ -101,6 +101,12 @@ export default class FlatFeed extends React.Component<Props> {
       }
   }
 
+  onInsertActivities = (activity) => {
+      if (this.feedRef._onInsertActivities) {
+          this.feedRef._onInsertActivities(activity)
+      }
+  }
+
   onInsertReaction = (kind, activity, reaction) => {
       if (this.feedRef._onInsertReaction) {
           this.feedRef._onInsertReaction(kind, activity, reaction)
@@ -197,6 +203,12 @@ class FlatFeedInner extends React.Component<PropsInner> {
       }
   }
 
+  _onInsertActivities = (activity) => {
+      if (this.props.onInsertActivities) {
+          this.props.onInsertActivities(activity)
+      }
+  }
+
   _onInsertReaction = (kind, activity, reaction) => {
       if (this.props.onInsertReaction) {
           this.props.onInsertReaction(kind, activity, reaction)
@@ -212,12 +224,16 @@ class FlatFeedInner extends React.Component<PropsInner> {
           i++;
       }
 
-      this._scrollToIndex({
-          animated: true,
-          index: i,
-          viewOffset: -80,
-          viewPosition: 1,
-      })
+      try {
+          this._scrollToIndex({
+              animated: true,
+              index: i,
+              viewOffset: -80,
+              viewPosition: 1,
+          })
+      } catch (e) {
+          console.log('scrollToActivity error', e);
+      }
   }
 
   _scrollToEnd = (animated = true) => {
@@ -271,6 +287,7 @@ class FlatFeedInner extends React.Component<PropsInner> {
     onToggleReaction: this.props.onToggleReaction,
     onAddReaction: this.props.onAddReaction,
     onDeleteReaction: this.props.onDeleteReaction,
+    onInsertActivities: this.props.onInsertActivities,
     onInsertReaction: this.props.onInsertReaction,
     onRemoveReaction: this.props.onRemoveReaction,
     onToggleChildReaction: this.props.onToggleChildReaction,
