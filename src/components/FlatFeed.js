@@ -77,9 +77,15 @@ export default class FlatFeed extends React.Component<Props> {
     Notifier: NewActivitiesNotification,
   };
 
-  loadNextPage = () => {
+  loadReverseNextPage = async () => {
+      if (this.feedRef._loadReverseNextPage) {
+          await this.feedRef._loadReverseNextPage();
+      }
+  }
+
+  loadNextPage = async () => {
       if (this.feedRef._loadNextPage) {
-          this.feedRef._loadNextPage();
+          await this.feedRef._loadNextPage();
       }
   }
 
@@ -139,8 +145,8 @@ export default class FlatFeed extends React.Component<Props> {
       }
   }
 
-  refresh = () => {
-      this.feedRef._refresh();
+  refresh = async () => {
+      await this.feedRef._refresh();
   }
 
   render() {
@@ -173,9 +179,15 @@ type PropsInner = {| ...Props, ...BaseFeedCtx |};
 class FlatFeedInner extends React.Component<PropsInner> {
   listRef = React.createRef();
 
-  _loadNextPage = () => {
+  _loadReverseNextPage = async () => {
+      if (this.props.loadReverseNextPage) {
+          await this.props.loadReverseNextPage();
+      }
+  }
+
+  _loadNextPage = async () => {
       if (this.props.loadNextPage) {
-          this.props.loadNextPage();
+          await this.props.loadNextPage();
       }
   }
 
@@ -228,7 +240,7 @@ class FlatFeedInner extends React.Component<PropsInner> {
           this._scrollToIndex({
               animated: true,
               index: i,
-              viewOffset: -80,
+              viewOffset: -20,
               viewPosition: 1,
           })
       } catch (e) {
