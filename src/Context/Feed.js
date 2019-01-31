@@ -368,6 +368,58 @@ export class FeedManager {
       });
   };
 
+  onPinActivity = async (
+      activity: BaseActivityResponse,
+  ) => {
+      this.setState((prevState) => {
+          let { activities } = prevState;
+          for (const path of this.getActivityPaths(activity)) {
+              activities = activities.setIn([...path, 'is_pinned'], true)
+          }
+
+          return { activities };
+      });
+  };
+
+  onUnpinActivity = async (
+      activity: BaseActivityResponse,
+  ) => {
+      this.setState((prevState) => {
+          let { activities } = prevState;
+          for (const path of this.getActivityPaths(activity)) {
+              activities = activities.setIn([...path, 'is_pinned'], false)
+          }
+
+          return { activities };
+      });
+  };
+
+  onPinLiveActivity = async (
+      activity: BaseActivityResponse,
+  ) => {
+      this.setState((prevState) => {
+          let { activities } = prevState;
+          for (const path of this.getActivityPaths(activity)) {
+              activities = activities.setIn([...path, 'is_pinned_live'], true)
+          }
+
+          return { activities };
+      });
+  };
+
+  onUnpinLiveActivity = async (
+      activity: BaseActivityResponse,
+  ) => {
+      this.setState((prevState) => {
+          let { activities } = prevState;
+          for (const path of this.getActivityPaths(activity)) {
+              activities = activities.setIn([...path, 'is_pinned_live'], false)
+          }
+
+          return { activities };
+      });
+  };
+
   onInsertReaction = async (
     kind: string,
     activity: BaseActivityResponse,
@@ -1594,6 +1646,10 @@ class FeedInner extends React.Component<FeedInnerProps, FeedState> {
       onDeleteReaction: manager.onDeleteReaction,
       onInsertActivities: manager.onInsertActivities,
       onInsertReaction: manager.onInsertReaction,
+      onPinActivity: manager.onPinActivity,
+      onPinLiveActivity: manager.onPinLiveActivity,
+      onUnpinActivity: manager.onUnpinActivity,
+      onUnpinLiveActivity: manager.onUnpinLiveActivity,
       onRemoveReaction: manager.onRemoveReaction,
       onToggleChildReaction: manager.onToggleChildReaction,
       onAddChildReaction: manager.onAddChildReaction,

@@ -119,6 +119,30 @@ export default class FlatFeed extends React.Component<Props> {
       }
   }
 
+  onPinActivity = (activity) => {
+      if (this.feedRef._onPinActivity) {
+          this.feedRef._onPinActivity(activity)
+      }
+  }
+
+  onUnpinActivity = (activity) => {
+      if (this.feedRef._onUnpinActivity) {
+          this.feedRef._onUnpinActivity(activity)
+      }
+  }
+
+  onPinLiveActivity = (activity) => {
+      if (this.feedRef._onPinLiveActivity) {
+          this.feedRef._onPinLiveActivity(activity)
+      }
+  }
+
+  onUnpinLiveActivity = (activity) => {
+      if (this.feedRef._onUnpinLiveActivity) {
+          this.feedRef._onUnpinLiveActivity(activity)
+      }
+  }
+
   scrollToActivity = (activityId) => {
       this.feedRef._scrollToActivity(activityId);
   }
@@ -224,6 +248,30 @@ class FlatFeedInner extends React.Component<PropsInner> {
   _onInsertReaction = (kind, activity, reaction) => {
       if (this.props.onInsertReaction) {
           this.props.onInsertReaction(kind, activity, reaction)
+      }
+  }
+
+  _onPinActivity = (activity) => {
+      if (this.props.onPinActivity) {
+          this.props.onPinActivity(activity);
+      }
+  }
+
+  _onUnpinActivity = (activity) => {
+      if (this.props.onUnpinActivity) {
+          this.props.onUnpinActivity(activity);
+      }
+  }
+
+  _onPinLiveActivity = (activity) => {
+      if (this.props.onPinLiveActivity) {
+          this.props.onPinLiveActivity(activity);
+      }
+  }
+
+  _onUnpinLiveActivity = (activity) => {
+      if (this.props.onUnpinLiveActivity) {
+          this.props.onUnpinLiveActivity(activity);
       }
   }
 
