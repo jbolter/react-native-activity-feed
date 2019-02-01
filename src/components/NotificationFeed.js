@@ -54,6 +54,10 @@ export default class NotificationFeed extends React.Component<Props> {
       this.feedRef._refresh();
   }
 
+  refreshWithoutScroll = () => {
+      this.feedRef._refreshWithoutScroll();
+  }
+
   render() {
 
     return (
@@ -94,6 +98,11 @@ class NotificationFeedInner extends React.Component<PropsInner> {
       ref.current.scrollToOffset({ offset: 0 });
     }
   };
+
+  _refreshWithoutScroll = async () => {
+    await this.props.refresh(makeDefaultOptions(this.props.options));
+  };
+
   async componentDidMount() {
     await this._refresh();
   }
