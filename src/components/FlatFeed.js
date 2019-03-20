@@ -107,9 +107,9 @@ export default class FlatFeed extends React.Component<Props> {
       }
   }
 
-  onInsertActivities = (activity) => {
+  onInsertActivities = (activities, indexToInsert) => {
       if (this.feedRef._onInsertActivities) {
-          this.feedRef._onInsertActivities(activity)
+          this.feedRef._onInsertActivities(activities, indexToInsert)
       }
   }
 
@@ -239,9 +239,9 @@ class FlatFeedInner extends React.Component<PropsInner> {
       }
   }
 
-  _onInsertActivities = (activity) => {
+  _onInsertActivities = (activities, indexToInsert) => {
       if (this.props.onInsertActivities) {
-          this.props.onInsertActivities(activity)
+          this.props.onInsertActivities(activities, indexToInsert)
       }
   }
 

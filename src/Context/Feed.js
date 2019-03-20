@@ -332,6 +332,7 @@ export class FeedManager {
 
   onInsertActivities = async (
       data: Array<{}>,
+      indexToInsert?: number
   ) => {
       this.setState((prevState) => {
           const response = {
@@ -348,8 +349,23 @@ export class FeedManager {
 
           const newActivityOrder = response.results.map((a) => a.id);
 
+          let combinedActivityOrder;
+
+          if (indexToInsert) {
+              // Slice array from index to end
+              const prevActivityOrder = prevState.activityOrder.slice(indexToInsert);
+              // Slice array from start to index
+              const prevActivityOrderFirstElems = prevState.activityOrder.slice(0, indexToInsert);
+              // Insert activities at index
+              combinedActivityOrder = prevActivityOrderFirstElems.concat(newActivityOrder.concat(prevActivityOrder));
+          }
+          else {
+              // Add new activities to front of the array
+              combinedActivityOrder = newActivityOrder.concat(prevState.activityOrder);
+          }
+
           return {
-              activityOrder: newActivityOrder.concat(prevState.activityOrder),
+              activityOrder: combinedActivityOrder,
               activities: activities,
               activityIdToPath: activityIdToPath,
               activityIdToPaths: this.responseToActivityIdToPaths(
