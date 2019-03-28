@@ -450,28 +450,31 @@ export class FeedManager {
     this.setState((prevState) => {
       let { activities } = prevState;
       const { reactionIdToPaths } = prevState;
-      for (const path of this.getActivityPaths(activity)) {
-        this.removeFoundReactionIdPaths(
-          activities.getIn(path).toJS(),
-          reactionIdToPaths,
-          path,
-        );
+      const activityPaths = this.getActivityPaths(activity);
+      if (activityPaths) {
+          for (const path of activityPaths) {
+            this.removeFoundReactionIdPaths(
+              activities.getIn(path).toJS(),
+              reactionIdToPaths,
+              path,
+            );
 
-        activities = activities
-          .updateIn([...path, 'reaction_counts', kind], (v = 0) => v + 1)
-          .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
-            v.unshift(enrichedReaction),
-          )
-          .updateIn(
-            [...path, 'latest_reactions', kind],
-            (v = immutable.List()) => v.unshift(enrichedReaction),
-          );
+            activities = activities
+              .updateIn([...path, 'reaction_counts', kind], (v = 0) => v + 1)
+              .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
+                v.unshift(enrichedReaction),
+              )
+              .updateIn(
+                [...path, 'latest_reactions', kind],
+                (v = immutable.List()) => v.unshift(enrichedReaction),
+              );
 
-        this.addFoundReactionIdPaths(
-          activities.getIn(path).toJS(),
-          reactionIdToPaths,
-          path,
-        );
+            this.addFoundReactionIdPaths(
+              activities.getIn(path).toJS(),
+              reactionIdToPaths,
+              path,
+            );
+          }
       }
 
       return { activities, reactionIdToPaths };
@@ -552,29 +555,32 @@ export class FeedManager {
     return this.setState((prevState) => {
       let { activities } = prevState;
       const { reactionIdToPaths } = prevState;
-      for (const path of this.getActivityPaths(activity)) {
-        this.removeFoundReactionIdPaths(
-          activities.getIn(path).toJS(),
-          reactionIdToPaths,
-          path,
-        );
+      const activityPaths = this.getActivityPaths(activity);
+      if (activityPaths) {
+          for (const path of activityPaths) {
+              this.removeFoundReactionIdPaths(
+                  activities.getIn(path).toJS(),
+                  reactionIdToPaths,
+                  path,
+              );
 
-        activities = activities
-          .updateIn([...path, 'reaction_counts', kind], (v = 0) => v - 1)
-          .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
-            v.remove(v.findIndex((r) => r.get('id') === id)),
-          )
-          .updateIn(
-            [...path, 'latest_reactions', kind],
-            (v = immutable.List()) =>
-              v.remove(v.findIndex((r) => r.get('id') === id)),
-          );
+              activities = activities
+                  .updateIn([...path, 'reaction_counts', kind], (v = 0) => v - 1)
+                  .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
+                  v.remove(v.findIndex((r) => r.get('id') === id)),
+              )
+              .updateIn(
+                  [...path, 'latest_reactions', kind],
+                  (v = immutable.List()) =>
+                  v.remove(v.findIndex((r) => r.get('id') === id)),
+              );
 
-        this.addFoundReactionIdPaths(
-          activities.getIn(path).toJS(),
-          reactionIdToPaths,
-          path,
-        );
+              this.addFoundReactionIdPaths(
+                  activities.getIn(path).toJS(),
+                  reactionIdToPaths,
+                  path,
+              );
+          }
       }
 
       return { activities, reactionIdToPaths };
