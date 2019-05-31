@@ -50,6 +50,12 @@ export default class NotificationFeed extends React.Component<Props> {
     Notifier: NewActivitiesNotification,
   };
 
+  loadNextPage = async () => {
+      if (this.feedRef._loadNextPage) {
+          await this.feedRef._loadNextPage();
+      }
+  }
+
   refresh = () => {
       this.feedRef._refresh();
   }
@@ -91,6 +97,13 @@ const makeDefaultOptions = (options) => {
 type PropsInner = {| ...Props, ...BaseFeedCtx |};
 class NotificationFeedInner extends React.Component<PropsInner> {
   listRef = React.createRef();
+
+  _loadNextPage = async () => {
+      if (this.props.loadNextPage) {
+          await this.props.loadNextPage();
+      }
+  }
+
   _refresh = async () => {
     await this.props.refresh(makeDefaultOptions(this.props.options));
     let ref = this.listRef;
