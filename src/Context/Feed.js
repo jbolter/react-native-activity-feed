@@ -389,9 +389,18 @@ export class FeedManager {
   ) => {
       this.setState((prevState) => {
           let { activities } = prevState;
-          for (const path of this.getActivityPaths(activity)) {
-              activities = activities.setIn([...path, 'is_pinned'], true)
-          }
+          activities.valueSeq().forEach( v => {
+              const act = v.toJS();
+              for (const path of this.getActivityPaths(act)) {
+                  if (act.id === activity.id) {
+                      activities = activities.setIn([...path, 'is_pinned'], true)
+                  }
+                  else {
+                      activities = activities.setIn([...path, 'is_pinned'], false)
+                      activities = activities.setIn([...path, 'is_pinned_live'], false)
+                  }
+              }
+          });
 
           return { activities };
       });
@@ -415,9 +424,18 @@ export class FeedManager {
   ) => {
       this.setState((prevState) => {
           let { activities } = prevState;
-          for (const path of this.getActivityPaths(activity)) {
-              activities = activities.setIn([...path, 'is_pinned_live'], true)
-          }
+          activities.valueSeq().forEach( v => {
+              const act = v.toJS();
+              for (const path of this.getActivityPaths(act)) {
+                  if (act.id === activity.id) {
+                      activities = activities.setIn([...path, 'is_pinned_live'], true)
+                  }
+                  else {
+                      activities = activities.setIn([...path, 'is_pinned'], false)
+                      activities = activities.setIn([...path, 'is_pinned_live'], false)
+                  }
+              }
+          });
 
           return { activities };
       });
