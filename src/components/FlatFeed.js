@@ -113,9 +113,9 @@ export default class FlatFeed extends React.Component<Props> {
       }
   }
 
-  onInsertReaction = (kind, activity, reaction) => {
+  onInsertReaction = (kind, activity, reaction, isOwn) => {
       if (this.feedRef._onInsertReaction) {
-          this.feedRef._onInsertReaction(kind, activity, reaction)
+          this.feedRef._onInsertReaction(kind, activity, reaction, isOwn)
       }
   }
 
@@ -245,9 +245,9 @@ class FlatFeedInner extends React.Component<PropsInner> {
       }
   }
 
-  _onInsertReaction = (kind, activity, reaction) => {
+  _onInsertReaction = (kind, activity, reaction, isOwn) => {
       if (this.props.onInsertReaction) {
-          this.props.onInsertReaction(kind, activity, reaction)
+          this.props.onInsertReaction(kind, activity, reaction, isOwn)
       }
   }
 

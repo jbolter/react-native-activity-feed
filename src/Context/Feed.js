@@ -458,6 +458,7 @@ export class FeedManager {
     kind: string,
     activity: BaseActivityResponse,
     reaction: any,
+    isOwn?: boolean,
   ) => {
     // this.trackAnalytics(kind, activity, options.trackAnalytics);
     const enrichedReaction = immutable.fromJS({
@@ -479,13 +480,19 @@ export class FeedManager {
 
             activities = activities
               .updateIn([...path, 'reaction_counts', kind], (v = 0) => v + 1)
-              .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
-                v.unshift(enrichedReaction),
-              )
               .updateIn(
                 [...path, 'latest_reactions', kind],
                 (v = immutable.List()) => v.unshift(enrichedReaction),
               );
+
+            if (isOwn) {
+                activities = activities
+                .updateIn([...path, 'own_reactions', kind], (v = immutable.List()) =>
+                  v.unshift(enrichedReaction),
+                );
+            }
+
+
 
             this.addFoundReactionIdPaths(
               activities.getIn(path).toJS(),
