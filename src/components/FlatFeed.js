@@ -143,6 +143,18 @@ export default class FlatFeed extends React.Component<Props> {
       }
   }
 
+  onPromoteActivity = (activity) => {
+      if (this.feedRef._onPromoteActivity) {
+          this.feedRef._onPromoteActivity(activity)
+      }
+  }
+
+  onUnpromoteActivity = (activity) => {
+      if (this.feedRef._onUnpromoteActivity) {
+          this.feedRef._onUnpromoteActivity(activity)
+      }
+  }
+
   scrollToActivity = (activityId) => {
       this.feedRef._scrollToActivity(activityId);
   }
@@ -272,6 +284,18 @@ class FlatFeedInner extends React.Component<PropsInner> {
   _onUnpinLiveActivity = (activity) => {
       if (this.props.onUnpinLiveActivity) {
           this.props.onUnpinLiveActivity(activity);
+      }
+  }
+
+  _onPromoteActivity = (activity) => {
+      if (this.props.onPromoteActivity) {
+          this.props.onPromoteActivity(activity);
+      }
+  }
+
+  _onUnpromoteActivity = (activity) => {
+      if (this.props.onUnpromoteActivity) {
+          this.props.onUnpromoteActivity(activity);
       }
   }
 

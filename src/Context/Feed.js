@@ -454,6 +454,37 @@ export class FeedManager {
       });
   };
 
+  onPromoteActivity = async (
+      activity: BaseActivityResponse,
+  ) => {
+      this.setState((prevState) => {
+          let { activities } = prevState;
+          activities.valueSeq().forEach( v => {
+              const act = v.toJS();
+              for (const path of this.getActivityPaths(act)) {
+                  if (act.id === activity.id) {
+                      activities = activities.setIn([...path, 'tagged_for_email_digest'], true)
+                  }
+              }
+          });
+
+          return { activities };
+      });
+  };
+
+  onUnpromoteActivity = async (
+      activity: BaseActivityResponse,
+  ) => {
+      this.setState((prevState) => {
+          let { activities } = prevState;
+          for (const path of this.getActivityPaths(activity)) {
+              activities = activities.setIn([...path, 'tagged_for_email_digest'], false)
+          }
+
+          return { activities };
+      });
+  };
+
   onInsertReaction = async (
     kind: string,
     activity: BaseActivityResponse,
@@ -1697,6 +1728,8 @@ class FeedInner extends React.Component<FeedInnerProps, FeedState> {
       onPinLiveActivity: manager.onPinLiveActivity,
       onUnpinActivity: manager.onUnpinActivity,
       onUnpinLiveActivity: manager.onUnpinLiveActivity,
+      onPromoteActivity: manager.onPromoteActivity,
+      onUnpromoteActivity: manager.onUnpromoteActivity,
       onRemoveReaction: manager.onRemoveReaction,
       onToggleChildReaction: manager.onToggleChildReaction,
       onAddChildReaction: manager.onAddChildReaction,
