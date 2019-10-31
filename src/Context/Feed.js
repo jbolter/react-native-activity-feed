@@ -459,14 +459,9 @@ export class FeedManager {
   ) => {
       this.setState((prevState) => {
           let { activities } = prevState;
-          activities.valueSeq().forEach( v => {
-              const act = v.toJS();
-              for (const path of this.getActivityPaths(act)) {
-                  if (act.id === activity.id) {
-                      activities = activities.setIn([...path, 'tagged_for_email_digest'], true)
-                  }
-              }
-          });
+          for (const path of this.getActivityPaths(activity)) {
+              activities = activities.setIn([...path, 'tagged_for_email_digest'], true)
+          }
 
           return { activities };
       });
