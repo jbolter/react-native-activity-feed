@@ -24,6 +24,7 @@ import type {
 
 type Props = {|
   feedGroup: string,
+  theme?: string,
   userId?: string,
   /** read options for the API client (eg. limit, ranking, ...) */
   options?: FeedRequestOptions,
@@ -70,6 +71,7 @@ export default class FlatFeed extends React.Component<Props> {
   static defaultProps = {
     styles: {},
     feedGroup: 'timeline',
+    theme: '',
     notify: false,
     realtime: false,
     inverted: false,
@@ -361,6 +363,7 @@ class FlatFeedInner extends React.Component<PropsInner> {
           navigation={this.props.navigation}
           feedGroup={this.props.feedGroup}
           userId={this.props.userId}
+          theme={this.props.theme}
       />
     );
   };

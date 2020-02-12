@@ -19,6 +19,7 @@ import type { FeedRequestOptions, FeedResponse } from 'getstream';
 
 type Props = {|
   feedGroup: string,
+  theme?: string,
   userId?: string,
   options?: FeedRequestOptions,
   Group: Renderable,
@@ -46,6 +47,7 @@ type Props = {|
 export default class NotificationFeed extends React.Component<Props> {
   static defaultProps = {
     feedGroup: 'notification',
+    theme: '',
     styles: {},
     Notifier: NewActivitiesNotification,
   };
@@ -71,6 +73,7 @@ export default class NotificationFeed extends React.Component<Props> {
           blockedUserIds={this.props.blockedUserIds}
           blockedByUserIds={this.props.blockedByUserIds}
           feedGroup={this.props.feedGroup}
+          theme={this.props.theme}
           userId={this.props.userId}
           options={makeDefaultOptions(this.props.options)}
           notify={this.props.notify}
@@ -123,11 +126,12 @@ class NotificationFeedInner extends React.Component<PropsInner> {
   _renderWrappedGroup = ({ item }: { item: BaseActivityResponse }) => {
     return (
       <ImmutableItemWrapper
-        renderItem={this._renderGroup}
-        item={item}
-        navigation={this.props.navigation}
-        feedGroup={this.props.feedGroup}
-        userId={this.props.userId}
+          renderItem={this._renderGroup}
+          item={item}
+          navigation={this.props.navigation}
+          feedGroup={this.props.feedGroup}
+          userId={this.props.userId}
+          theme={this.props.theme}
       />
     );
   };
@@ -142,6 +146,7 @@ class NotificationFeedInner extends React.Component<PropsInner> {
     onRemoveChildReaction: this.props.onRemoveChildReaction,
     navigation: this.props.navigation,
     feedGroup: this.props.feedGroup,
+    theme: this.props.theme,
     userId: this.props.userId,
   });
 
