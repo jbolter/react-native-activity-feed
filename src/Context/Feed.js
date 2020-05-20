@@ -343,8 +343,15 @@ export class FeedManager {
       indexToInsert?: number
   ) => {
       this.setState((prevState) => {
+          let activityIDs = [];
+          try {
+              activityIDs = Object.keys(prevState.activities.toJS());
+          } catch (e) {
+              console.log(e);
+          }
+
           const response = {
-              results: data,
+              results: data.filter(act => !activityIDs.includes(act.id)),
           }
 
           let activities = prevState.activities.merge(
