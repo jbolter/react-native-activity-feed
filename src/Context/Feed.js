@@ -159,6 +159,8 @@ export class FeedManager {
       previousUrl = `?id_gte=${initialOptions.id_lt}`;
     }
     this.state.lastReverseResponse = { next: previousUrl };
+
+    this.insertedReactionIDs = new Set();
   }
 
   register(callback: () => mixed) {
@@ -294,10 +296,16 @@ export class FeedManager {
       user: this.props.user.full,
     });
 
+    if (this.insertedReactionIDs.has(reaction.id)) {
+        return;
+    }
+
     // Healthline: Notify other feeds that this is happening
     // This is used to update the "parent" feed of a thread
     const eventData = {new: [{object: activity, reaction: reaction, verb: reaction.kind,}]};
     window.notificationEventBus.trigger('FEED_ACTIVITY_REACTIONS_LISTENER', eventData);
+
+    this.insertedReactionIDs = new Set([...this.insertedReactionIDs, reaction.id]);
 
     this.setState((prevState) => {
       let { activities } = prevState;
@@ -491,6 +499,12 @@ export class FeedManager {
       ...reaction,
       user: reaction.user,
     });
+
+    if (this.insertedReactionIDs.has(reaction.id)) {
+        return;
+    }
+
+    this.insertedReactionIDs = new Set([...this.insertedReactionIDs, reaction.id]);
 
     this.setState((prevState) => {
       let { activities } = prevState;
@@ -1154,6 +1168,8 @@ export class FeedManager {
     if (options.mark_read === true) {
       newState.unread = 0;
     }
+
+    this.insertedReactionIDs = new Set();
 
     return this.setState(newState);
   };
