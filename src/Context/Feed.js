@@ -297,7 +297,7 @@ export class FeedManager {
     });
 
     if (this.insertedReactionIDs.has(reaction.id)) {
-        return;
+        return enrichedReaction.toJS();
     }
 
     // Healthline: Notify other feeds that this is happening
@@ -336,6 +336,8 @@ export class FeedManager {
 
       return { activities, reactionIdToPaths };
     });
+
+    return enrichedReaction.toJS();
   };
 
   onInsertActivities = async (
@@ -678,12 +680,15 @@ export class FeedManager {
     );
 
     const last = currentReactions.last();
+    let reaction;
     if (last) {
       await this.onRemoveReaction(kind, activity, last.get('id'), options);
     } else {
-      await this.onAddReaction(kind, activity, data, options);
+      reaction = await this.onAddReaction(kind, activity, data, options);
     }
     delete togglingReactions[activity.id];
+
+    return reaction;
   };
 
   onAddChildReaction = async (
