@@ -25,6 +25,7 @@ import type {
 type Props = {|
   feedGroup: string,
   theme?: string,
+  extraData?: any,
   userId?: string,
   /** read options for the API client (eg. limit, ranking, ...) */
   options?: FeedRequestOptions,
@@ -69,6 +70,7 @@ const TOP_REACHED_THRESHOLD = 50;
  */
 export default class FlatFeed extends React.Component<Props> {
   static defaultProps = {
+    extraData: {},
     styles: {},
     feedGroup: 'timeline',
     theme: '',
@@ -364,6 +366,7 @@ class FlatFeedInner extends React.Component<PropsInner> {
           feedGroup={this.props.feedGroup}
           userId={this.props.userId}
           theme={this.props.theme}
+          extraData={this.props.extraData}
       />
     );
   };
